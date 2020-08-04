@@ -8,8 +8,7 @@ import (
 )
 
 // Dictinary 字典
-var Dictinary *map[interface{}]interface{}
-
+var Dictinary *map[string]interface{}
 // LoadLocales 读取国际化文件
 func LoadLocales(path string) error {
 	data, err := ioutil.ReadFile(path)
@@ -17,7 +16,7 @@ func LoadLocales(path string) error {
 		return err
 	}
 
-	m := make(map[interface{}]interface{})
+	m := make(map[string]interface{})
 	err = yaml.Unmarshal([]byte(data), &m)
 	if err != nil {
 		return err
@@ -32,33 +31,33 @@ func LoadLocales(path string) error {
 func T(key string) string {
 	dic := *Dictinary
 	keys := strings.Split(key, ".")
+	k_len := len(keys)
 	for index, path := range keys {
 		// 如果到达了最后一层，寻找目标翻译
-		if len(keys) == (index + 1) {
+		if k_len == (index + 1) {
 			for k, v := range dic {
-				if k, ok := k.(string); ok {
-					if k == path {
-						if value, ok := v.(string); ok {
-							return value
-						}
+				if k == path {
+					if value, ok := v.(string); ok {
+						return value
+					}else{
+						return""
 					}
 				}
 			}
-			return path
+			return""
 		}
+		return path
 		// 如果还有下一层，继续寻找
 		for k, v := range dic {
-			if ks, ok := k.(string); ok {
-				if ks == path {
-					if dic, ok = v.(map[interface{}]interface{}); ok == false {
-						return path
-					}
+			if k == path {
+				if value, ok := v.(string); ok {
+					return value
+				} else {
+					return ""
 				}
-			} else {
-				return ""
 			}
 		}
 	}
-
 	return ""
 }
+
